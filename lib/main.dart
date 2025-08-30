@@ -5,6 +5,9 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
+import 'package:survival/inventory/inventory.dart';
+import 'package:survival/inventory/inventoryComponent.dart';
+import 'package:survival/inventory/item.dart';
 import 'package:survival/menu.dart';
 import 'package:survival/player.dart';
 import 'package:survival/tree.dart';
@@ -32,13 +35,16 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
   late Sprite grass;
   late Sprite dirt;
   late Player player;
+  late Inventory inventory;
+  late InventoryComponent inventorycomponent;
+  List<SpriteComponent> waterTiles = [];
 
   final noise = PerlinNoise(seed: 12345);
 
   @override
   FutureOr<void> onLoad() async {
     super.onLoad();
-    final player = Player();
+    player = Player();
 
     water = await loadSprite("water.png");
     grass = await loadSprite("grass.jpg");
@@ -57,13 +63,17 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
           sprite = dirt;
         }
 
-        add(
-          SpriteComponent(
-            sprite: sprite,
-            size: Vector2.all(tileSize),
-            position: Vector2(x * tileSize, y * tileSize),
-          ),
+        final tile = SpriteComponent(
+          sprite: sprite,
+          size: Vector2.all(tileSize),
+          position: Vector2(x * tileSize, y * tileSize),
         );
+
+        add(tile);
+
+        if (sprite == water) {
+          waterTiles.add(tile);
+        }
       }
     }
     add(player);
@@ -72,6 +82,13 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
     final tree = Tree();
     tree.position = Vector2(100, 100);
     add(tree);
+
+    inventory = Inventory();
+
+    inventorycomponent = InventoryComponent(inventory);
+    add(inventorycomponent);
+
+    player.inventory = inventory;
   }
 
   void startGame() {

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:survival/inventory/inventory.dart';
+import 'package:survival/inventory/item.dart';
 import 'package:survival/main.dart';
 import 'package:flutter/services.dart';
 import 'package:survival/tree.dart';
@@ -10,6 +12,8 @@ class Player extends SpriteComponent
     with HasGameRef<Survival>, KeyboardHandler {
   Vector2 movement = Vector2.zero();
   Vector2 velocity = Vector2.zero();
+  late Inventory inventory;
+  late Sprite woodSprite;
 
   @override
   FutureOr<void> onLoad() async {
@@ -17,6 +21,8 @@ class Player extends SpriteComponent
     size = Vector2(70, 70);
 
     add(RectangleHitbox());
+    woodSprite = await gameRef.loadSprite("wood.png");
+
     return super.onLoad();
   }
 
@@ -54,12 +60,13 @@ class Player extends SpriteComponent
     return super.onKeyEvent(event, keysPressed);
   }
 
-  void talar() {
+  void talar() async {
     final hits = game.children.whereType<Tree>().where(
       (tree) => tree.toRect().overlaps(toRect()),
     );
     for (final tree in hits) {
       tree.removeFromParent();
+      inventory.addItem(Item(name: "madera", sprite: woodSprite));
     }
   }
 }
