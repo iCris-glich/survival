@@ -6,7 +6,7 @@ import 'package:survival/inventory/inventory.dart';
 import 'package:survival/inventory/item.dart';
 import 'package:survival/main.dart';
 import 'package:flutter/services.dart';
-import 'package:survival/tree.dart';
+import 'package:survival/thigs/tree.dart';
 
 class Player extends SpriteComponent
     with HasGameRef<Survival>, KeyboardHandler {
@@ -57,6 +57,9 @@ class Player extends SpriteComponent
     if (keysPressed.contains(LogicalKeyboardKey.space)) {
       talar();
     }
+    if (keysPressed.contains(LogicalKeyboardKey.keyE)) {
+      crafteo();
+    }
     return super.onKeyEvent(event, keysPressed);
   }
 
@@ -69,4 +72,6 @@ class Player extends SpriteComponent
       inventory.addItem(Item(name: "madera", sprite: woodSprite));
     }
   }
+
+  void crafteo() async {}
 }

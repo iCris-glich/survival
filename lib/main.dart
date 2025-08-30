@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:fast_noise/fast_noise.dart';
 import 'package:flame/components.dart';
@@ -7,10 +8,9 @@ import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
 import 'package:survival/inventory/inventory.dart';
 import 'package:survival/inventory/inventoryComponent.dart';
-import 'package:survival/inventory/item.dart';
 import 'package:survival/menu.dart';
 import 'package:survival/player.dart';
-import 'package:survival/tree.dart';
+import 'package:survival/thigs/tree.dart';
 
 void main() {
   runApp(
@@ -55,9 +55,9 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
         double value = noise.getNoise2(x * 0.1, y * 0.7);
 
         Sprite sprite;
-        if (value < -0.13) {
+        if (value < -0.2) {
           sprite = water;
-        } else if (value < 0.1) {
+        } else if (value < 0.2) {
           sprite = grass;
         } else {
           sprite = dirt;
@@ -79,9 +79,20 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
     add(player);
     camera.follow(player);
 
-    final tree = Tree();
-    tree.position = Vector2(100, 100);
-    add(tree);
+    int createTree = 0;
+    final random = Random();
+    while (createTree < 50) {
+      final tree = Tree();
+      final x = random.nextDouble() * size.x;
+      final y = random.nextDouble() * size.y;
+      final pos = Vector2(x, y);
+
+      if (!onWater(pos, tileSize, waterTiles)) {
+        tree.position = pos;
+        add(tree);
+        createTree++;
+      }
+    }
 
     inventory = Inventory();
 
@@ -93,5 +104,19 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
 
   void startGame() {
     overlays.remove("MainMenu");
+  }
+
+  bool onWater(
+    Vector2 position,
+    double tileSize,
+    List<SpriteComponent> waterTiles,
+  ) {
+    for (final tile in waterTiles) {
+      final reactTile = Rect.fromLTWH(tile.x, tile.y, tileSize, tileSize);
+      if (reactTile.contains(Offset(position.x, position.y))) {
+        return true;
+      }
+    }
+    return false;
   }
 }
