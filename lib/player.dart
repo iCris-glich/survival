@@ -58,7 +58,7 @@ class Player extends SpriteComponent
       talar();
     }
     if (keysPressed.contains(LogicalKeyboardKey.keyE)) {
-      crafteo();
+      toggleCrafteo();
     }
     return super.onKeyEvent(event, keysPressed);
   }
@@ -73,5 +73,11 @@ class Player extends SpriteComponent
     }
   }
 
-  void crafteo() async {}
+  void toggleCrafteo() {
+    if (gameRef.overlays.isActive("Crafteo")) {
+      gameRef.overlays.remove("Crafteo");
+    } else {
+      gameRef.overlays.add("Crafteo");
+    }
+  }
 }

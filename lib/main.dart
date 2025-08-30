@@ -8,7 +8,9 @@ import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
 import 'package:survival/inventory/inventory.dart';
 import 'package:survival/inventory/inventoryComponent.dart';
+import 'package:survival/inventory/item.dart';
 import 'package:survival/menu.dart';
+import 'package:survival/overlay_crafteo.dart';
 import 'package:survival/player.dart';
 import 'package:survival/thigs/tree.dart';
 
@@ -20,6 +22,7 @@ void main() {
         'MainMenu': (context, game) {
           return MainMenu(game: game as Survival);
         },
+        'Crafteo': (context, game) => OverlayCrafteo(),
       },
       initialActiveOverlays: const ["MainMenu"],
     ),
@@ -95,6 +98,13 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
     }
 
     inventory = Inventory();
+
+    inventory.addItem(
+      Item(name: "madera", sprite: await loadSprite("hacha.png")),
+    );
+    inventory.addItem(
+      Item(name: "madera", sprite: await loadSprite("wood.png")),
+    );
 
     inventorycomponent = InventoryComponent(inventory);
     add(inventorycomponent);
