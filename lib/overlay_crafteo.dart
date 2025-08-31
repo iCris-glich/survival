@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:survival/inventory/inventory.dart';
 import 'package:survival/inventory/item.dart';
+import 'package:survival/recipe/recipe_craft.dart';
 
 class OverlayCrafteo extends StatefulWidget {
   final Inventory inventory;
@@ -19,28 +20,43 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
   List<Item?> craftingGrid = List.filled(9, null); // 3x3 grid
   Item? currentResult; // Resultado de la receta
 
+  // Cargar sprite usando Flame
   Future<Sprite> loadSprite(String path) async {
-    final image = await Flame.images.load(path);
+    // Solo pasa el nombre del archivo, no toda la ruta
+    final fileName = path.split('/').last; // "palo.jpg"
+    final image = await Flame.images.load(fileName);
     return Sprite(image);
   }
 
-  // Función para revisar recetas
+  // Verificar si la grilla coincide con alguna receta
   Future<Item?> checkCraftingGrid() async {
-    if (craftingGrid[0]?.name == "madera" &&
-        craftingGrid[3]?.name == "madera" &&
-        craftingGrid[6]?.name == "madera") {
-      final sprite = await loadSprite("palo.jpg");
-      return Item(
-        name: 'palo',
-        imagePath: "assets/images/palo.jpg",
-        sprite: sprite,
-        quantity: 10,
-      );
+    for (final recipe in recipes) {
+      // Copia de items en la grilla que no sean null
+      final gridItems = craftingGrid
+          .where((e) => e != null)
+          .map((e) => e!.name)
+          .toList();
+
+      // Lista de items necesarios para la receta (sin contar null)
+      final recipeItems = recipe.pattern.where((e) => e != null).toList();
+
+      // Verifica que todos los items de la receta estén en la grilla
+      bool match = recipeItems.every((item) => gridItems.contains(item));
+
+      if (match && gridItems.length == recipeItems.length) {
+        final sprite = await loadSprite(recipe.resultImage);
+        return Item(
+          name: recipe.resultName,
+          imagePath: recipe.resultImage,
+          sprite: sprite,
+          quantity: recipe.resutlQuantity,
+        );
+      }
     }
     return null;
   }
 
-  // Maneja el crafteo
+  // Manejar crafteo
   Future<void> handleCrafting() async {
     final result = await checkCraftingGrid();
     setState(() {
@@ -60,7 +76,7 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
         } else {
           widget.inventory.items.add(currentResult!);
         }
-        // Limpia la grilla y resultado
+        // Limpiar la grilla y resultado
         for (int i = 0; i < craftingGrid.length; i++) {
           craftingGrid[i] = null;
         }
@@ -68,6 +84,26 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
         currentResult = null;
       });
     }
+  }
+
+  // Reiniciar crafteo
+  void resetCrafting() {
+    setState(() {
+      for (int i = 0; i < craftingGrid.length; i++) {
+        final item = craftingGrid[i];
+        if (item != null) {
+          final invIndex = widget.inventory.items.indexWhere(
+            (inv) => inv.name == item.name,
+          );
+          if (invIndex != -1) {
+            widget.inventory.items[invIndex].quantity += 1;
+          }
+          craftingGrid[i] = null;
+        }
+      }
+      selectedItem = null;
+      currentResult = null;
+    });
   }
 
   @override
@@ -90,7 +126,7 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Cuadro 3x3 para crafteo
+                // Grilla 3x3 de crafteo
                 Container(
                   height: 200,
                   width: 200,
@@ -113,7 +149,7 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
                               craftingGrid[index] = selectedItem;
                               selectedItem = null;
                             });
-                            await handleCrafting(); // revisa receta
+                            await handleCrafting();
                           }
                         },
                         child: Container(
@@ -131,7 +167,7 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                // Cuadro solitario para resultado
+                // Resultado del crafteo
                 Container(
                   height: 80,
                   width: 80,
@@ -190,6 +226,7 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
               ],
             ),
             const SizedBox(height: 20),
+            // Botones
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -199,24 +236,7 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      for (int i = 0; i < craftingGrid.length; i++) {
-                        final item = craftingGrid[i];
-                        if (item != null) {
-                          final invIndex = widget.inventory.items.indexWhere(
-                            (inv) => inv.name == item.name,
-                          );
-                          if (invIndex != -1) {
-                            widget.inventory.items[invIndex].quantity += 1;
-                          }
-                          craftingGrid[i] = null;
-                        }
-                        selectedItem = null;
-                        currentResult = null;
-                      }
-                    });
-                  },
+                  onPressed: resetCrafting,
                   child: const Text("Reiniciar Crafteo"),
                 ),
               ],
