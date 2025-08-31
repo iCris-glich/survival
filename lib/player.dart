@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:survival/inventory/hoatConmponent.dart';
 import 'package:survival/inventory/inventory.dart';
 import 'package:survival/inventory/item.dart';
 import 'package:survival/main.dart';
 import 'package:flutter/services.dart';
+import 'package:survival/thigs/block.dart';
 import 'package:survival/thigs/hacha.dart';
 import 'package:survival/thigs/stone.dart';
 import 'package:survival/thigs/tree.dart';
@@ -18,6 +20,8 @@ class Player extends SpriteComponent
   late Sprite woodSprite;
   late Sprite hachaSprite;
   late Sprite stoneSprite;
+  late Sprite paredSprite;
+  late HotbarComponent hotbarComponent;
 
   int selectedIndex = 0;
 
@@ -27,15 +31,15 @@ class Player extends SpriteComponent
     size = Vector2(70, 70);
 
     add(RectangleHitbox());
-    woodSprite = await gameRef.loadSprite("wood.png");
+    woodSprite = await gameRef.loadSprite("palo.jpg");
     hachaSprite = await gameRef.loadSprite("hacha.png");
     stoneSprite = await gameRef.loadSprite("stone.png");
+    paredSprite = await gameRef.loadSprite("wood.png");
     return super.onLoad();
   }
 
   @override
   void update(double dt) {
-    // TODO: implement update
     super.update(dt);
     velocity = movement * 200;
     position += velocity * dt;
@@ -67,13 +71,34 @@ class Player extends SpriteComponent
     if (keysPressed.contains(LogicalKeyboardKey.keyE)) {
       toggleCrafteo();
     }
+    if (keysPressed.contains(LogicalKeyboardKey.escape)) {
+      togglePause();
+    }
+    if (keysPressed.contains(LogicalKeyboardKey.keyT)) {
+      placeBlock();
+    }
 
     if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.digit1) selectedIndex = 0;
-      if (event.logicalKey == LogicalKeyboardKey.digit2) selectedIndex = 1;
-      if (event.logicalKey == LogicalKeyboardKey.digit3) selectedIndex = 2;
-      if (event.logicalKey == LogicalKeyboardKey.digit4) selectedIndex = 3;
-      if (event.logicalKey == LogicalKeyboardKey.digit5) selectedIndex = 4;
+      if (event.logicalKey == LogicalKeyboardKey.digit1) {
+        selectedIndex = 0;
+        gameRef.hotbarComponent.selectedIndex = 0;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.digit2) {
+        selectedIndex = 1;
+        gameRef.hotbarComponent.selectedIndex = 1;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.digit3) {
+        selectedIndex = 2;
+        gameRef.hotbarComponent.selectedIndex = 2;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.digit4) {
+        selectedIndex = 3;
+        gameRef.hotbarComponent.selectedIndex = 3;
+      }
+      if (event.logicalKey == LogicalKeyboardKey.digit5) {
+        selectedIndex = 4;
+        gameRef.hotbarComponent.selectedIndex = 4;
+      }
     }
     return super.onKeyEvent(event, keysPressed);
   }
@@ -90,15 +115,18 @@ class Player extends SpriteComponent
         );
         for (final tree in trees) {
           action = true;
-          tree.removeFromParent();
-          inventory.addItem(
-            Item(
-              name: "madera",
-              sprite: woodSprite,
-              quantity: 2,
-              imagePath: "assets/images/wood.png",
-            ),
-          );
+          tree.life -= 50;
+          if (tree.life <= 0) {
+            tree.removeFromParent();
+            inventory.addItem(
+              Item(
+                name: "palo",
+                sprite: woodSprite,
+                quantity: 2,
+                imagePath: "assets/images/palo.jpg",
+              ),
+            );
+          }
         }
       }
     }
@@ -133,6 +161,32 @@ class Player extends SpriteComponent
           imagePath: "assets/images/stone.png",
         ),
       );
+    }
+  }
+
+  void placeBlock() {
+    if (selectedIndex < inventory.items.length) {
+      final selectedItem = inventory.items[selectedIndex];
+
+      if (selectedItem.name == "madera" && selectedItem.quantity > 0) {
+        final blockPosition = position + Vector2(0, -size.y);
+        final block = BlockGame(blockPosition, paredSprite);
+
+        gameRef.add(block);
+
+        selectedItem.quantity--;
+        if (selectedItem.quantity <= 0) {
+          inventory.items.removeAt(selectedIndex);
+        }
+      }
+    }
+  }
+
+  void togglePause() {
+    if (gameRef.overlays.isActive("Pause")) {
+      gameRef.overlays.remove("Pause");
+    } else {
+      gameRef.overlays.add("Pause");
     }
   }
 

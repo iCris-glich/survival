@@ -116,7 +116,7 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: CupertinoColors.systemGrey.withOpacity(0.8),
+      color: const Color.fromARGB(255, 44, 44, 46).withOpacity(0.8),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:survival/main.dart';
 
 class Hacha extends SpriteComponent {
   @override

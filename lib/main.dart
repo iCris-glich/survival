@@ -6,11 +6,12 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
+import 'package:survival/inventory/hoatConmponent.dart';
 import 'package:survival/inventory/inventory.dart';
 import 'package:survival/inventory/inventoryComponent.dart';
-import 'package:survival/inventory/item.dart';
-import 'package:survival/menu.dart';
-import 'package:survival/overlay_crafteo.dart';
+import 'package:survival/overlay/ovelay_menu.dart';
+import 'package:survival/overlay/overlay_crafteo.dart';
+import 'package:survival/overlay/overlay_pause.dart';
 import 'package:survival/player.dart';
 import 'package:survival/thigs/hacha.dart';
 import 'package:survival/thigs/stone.dart';
@@ -30,6 +31,10 @@ void main() {
           final survivalGame = game as Survival;
           return OverlayCrafteo(inventory: survivalGame.inventory);
         },
+        'Pause': (context, game) {
+          final survivalGame = game as Survival;
+          return OverlayPause(game: survivalGame);
+        },
       },
       initialActiveOverlays: const ["MainMenu"],
     ),
@@ -47,6 +52,7 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
   late Player player;
   late Inventory inventory;
   late InventoryComponent inventorycomponent;
+  late final HotbarComponent hotbarComponent;
   List<SpriteComponent> waterTiles = [];
 
   final noise = PerlinNoise(seed: 12345);
@@ -122,10 +128,14 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
     // inicializar inventario
     inventory = Inventory();
     inventorycomponent = InventoryComponent(inventory);
-    add(inventorycomponent);
 
     // conectar inventario al jugador
     player.inventory = inventory;
+
+    hotbarComponent = HotbarComponent(player.inventory)
+      ..position = Vector2(20, size.y - 100)
+      ..priority = 100;
+    add(hotbarComponent);
   }
 
   void startGame() {

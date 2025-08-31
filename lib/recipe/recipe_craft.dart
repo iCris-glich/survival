@@ -1,9 +1,19 @@
 import 'package:survival/recipe/recipe.dart';
 
 final stickRecipe = Recipe(
-  pattern: ["madera", null, null, "madera", null, null, "madera", null, null],
-  resultName: "palo",
-  resultImage: "assets/images/palo.jpg",
+  pattern: [
+    "palo",
+    "palo",
+    "palo",
+    "palo",
+    "palo",
+    "palo",
+    "palo",
+    "palo",
+    "palo",
+  ],
+  resultName: "madera",
+  resultImage: "assets/images/wood.png",
   resutlQuantity: 10,
 );
 

@@ -4,6 +4,8 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 
 class Tree extends SpriteComponent {
+  int life = 100;
+
   @override
   FutureOr<void> onLoad() async {
     sprite = await Sprite.load("tree.png");
