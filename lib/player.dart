@@ -7,6 +7,7 @@ import 'package:survival/inventory/item.dart';
 import 'package:survival/main.dart';
 import 'package:flutter/services.dart';
 import 'package:survival/thigs/hacha.dart';
+import 'package:survival/thigs/stone.dart';
 import 'package:survival/thigs/tree.dart';
 
 class Player extends SpriteComponent
@@ -16,6 +17,9 @@ class Player extends SpriteComponent
   late Inventory inventory;
   late Sprite woodSprite;
   late Sprite hachaSprite;
+  late Sprite stoneSprite;
+
+  int selectedIndex = 0;
 
   @override
   FutureOr<void> onLoad() async {
@@ -25,6 +29,7 @@ class Player extends SpriteComponent
     add(RectangleHitbox());
     woodSprite = await gameRef.loadSprite("wood.png");
     hachaSprite = await gameRef.loadSprite("hacha.png");
+    stoneSprite = await gameRef.loadSprite("stone.png");
     return super.onLoad();
   }
 
@@ -62,29 +67,39 @@ class Player extends SpriteComponent
     if (keysPressed.contains(LogicalKeyboardKey.keyE)) {
       toggleCrafteo();
     }
+
+    if (event is KeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.digit1) selectedIndex = 0;
+      if (event.logicalKey == LogicalKeyboardKey.digit2) selectedIndex = 1;
+      if (event.logicalKey == LogicalKeyboardKey.digit3) selectedIndex = 2;
+      if (event.logicalKey == LogicalKeyboardKey.digit4) selectedIndex = 3;
+      if (event.logicalKey == LogicalKeyboardKey.digit5) selectedIndex = 4;
+    }
     return super.onKeyEvent(event, keysPressed);
   }
 
   void accion() async {
     bool action = false;
 
-    final onHacha = inventory.items.any((item) => item.name == "hacha");
+    if (selectedIndex < inventory.items.length) {
+      final selectedItem = inventory.items[selectedIndex];
 
-    if (onHacha) {
-      final trees = game.children.whereType<Tree>().where(
-        (tree) => tree.toRect().overlaps(toRect()),
-      );
-      for (final tree in trees) {
-        action = true;
-        tree.removeFromParent();
-        inventory.addItem(
-          Item(
-            name: "madera",
-            sprite: woodSprite,
-            quantity: 2,
-            imagePath: "assets/images/wood.png",
-          ),
+      if (selectedItem.name == "hacha") {
+        final trees = game.children.whereType<Tree>().where(
+          (tree) => tree.toRect().overlaps(toRect()),
         );
+        for (final tree in trees) {
+          action = true;
+          tree.removeFromParent();
+          inventory.addItem(
+            Item(
+              name: "madera",
+              sprite: woodSprite,
+              quantity: 2,
+              imagePath: "assets/images/wood.png",
+            ),
+          );
+        }
       }
     }
 
@@ -100,6 +115,22 @@ class Player extends SpriteComponent
           sprite: hachaSprite,
           quantity: 1,
           imagePath: "assets/images/hacha.png",
+        ),
+      );
+    }
+
+    final stones = game.children.whereType<Stone>().where(
+      (stone) => stone.toRect().overlaps(toRect()),
+    );
+    for (final stone in stones) {
+      action = true;
+      stone.removeFromParent();
+      inventory.addItem(
+        Item(
+          name: "stone",
+          sprite: stoneSprite,
+          quantity: 1,
+          imagePath: "assets/images/stone.png",
         ),
       );
     }

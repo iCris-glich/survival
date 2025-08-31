@@ -7,21 +7,18 @@ final stickRecipe = Recipe(
   resutlQuantity: 10,
 );
 
+final picoRecipe = Recipe(
+  pattern: ["stone", "stone", "stone", null, "palo", null, null, "palo", null],
+  resultName: "pico",
+  resultImage: "assets/images/pico.png",
+  resutlQuantity: 1,
+);
+
 final hachaRecipe = Recipe(
-  pattern: [
-    "madera",
-    "madera",
-    "madera",
-    null,
-    "palo",
-    null,
-    null,
-    "palo",
-    null,
-  ],
+  pattern: ["stone", "stone", null, "stone", "palo", null, null, "palo", null],
   resultName: "hacha",
   resultImage: "assets/images/hacha.png",
   resutlQuantity: 1,
 );
 
-final List<Recipe> recipes = [stickRecipe, hachaRecipe];
+final List<Recipe> recipes = [stickRecipe, picoRecipe, hachaRecipe];

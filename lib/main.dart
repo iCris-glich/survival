@@ -13,6 +13,7 @@ import 'package:survival/menu.dart';
 import 'package:survival/overlay_crafteo.dart';
 import 'package:survival/player.dart';
 import 'package:survival/thigs/hacha.dart';
+import 'package:survival/thigs/stone.dart';
 import 'package:survival/thigs/tree.dart';
 
 void main() {
@@ -94,17 +95,22 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
 
     // generar árboles aleatorios
     int createTree = 0;
+    int createStone = 0;
     final random = Random();
     while (createTree < 50) {
       final tree = Tree();
+      final stone = Stone();
       final x = random.nextDouble() * size.x;
       final y = random.nextDouble() * size.y;
       final pos = Vector2(x, y);
 
       if (!onWater(pos, tileSize, waterTiles)) {
         tree.position = pos;
+        stone.position = pos;
         add(tree);
+        add(stone);
         createTree++;
+        createStone++;
       }
     }
 

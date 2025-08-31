@@ -31,19 +31,26 @@ class _OverlayCrafteoState extends State<OverlayCrafteo> {
   // Verificar si la grilla coincide con alguna receta
   Future<Item?> checkCraftingGrid() async {
     for (final recipe in recipes) {
-      // Copia de items en la grilla que no sean null
-      final gridItems = craftingGrid
-          .where((e) => e != null)
-          .map((e) => e!.name)
-          .toList();
+      bool match = true;
 
-      // Lista de items necesarios para la receta (sin contar null)
-      final recipeItems = recipe.pattern.where((e) => e != null).toList();
+      for (int i = 0; i < 9; i++) {
+        final gridItem = craftingGrid[i]?.name;
+        final recipeItem = recipe.pattern[i];
 
-      // Verifica que todos los items de la receta estén en la grilla
-      bool match = recipeItems.every((item) => gridItems.contains(item));
+        // Si en la receta hay un material y no coincide, no es válida
+        if (recipeItem != null && recipeItem != gridItem) {
+          match = false;
+          break;
+        }
 
-      if (match && gridItems.length == recipeItems.length) {
+        // Si en la receta hay null pero en la grilla hay algo, tampoco es válida
+        if (recipeItem == null && gridItem != null) {
+          match = false;
+          break;
+        }
+      }
+
+      if (match) {
         final sprite = await loadSprite(recipe.resultImage);
         return Item(
           name: recipe.resultName,
