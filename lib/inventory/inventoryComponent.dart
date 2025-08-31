@@ -11,7 +11,7 @@ class InventoryComponent extends PositionComponent {
   InventoryComponent(
     this.inventory, {
     this.columns = 8,
-    this.itemSize = 32,
+    this.itemSize = 64,
     this.padding = 5,
   });
 
@@ -40,7 +40,7 @@ class InventoryComponent extends PositionComponent {
       final y = padding + row * (itemSize + padding);
 
       // dibujar sprite
-      item.sprite.render(
+      item.sprite?.render(
         canvas,
         position: Vector2(x, y),
         size: Vector2.all(itemSize),

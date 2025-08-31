@@ -6,6 +6,7 @@ import 'package:survival/inventory/inventory.dart';
 import 'package:survival/inventory/item.dart';
 import 'package:survival/main.dart';
 import 'package:flutter/services.dart';
+import 'package:survival/thigs/hacha.dart';
 import 'package:survival/thigs/tree.dart';
 
 class Player extends SpriteComponent
@@ -14,6 +15,7 @@ class Player extends SpriteComponent
   Vector2 velocity = Vector2.zero();
   late Inventory inventory;
   late Sprite woodSprite;
+  late Sprite hachaSprite;
 
   @override
   FutureOr<void> onLoad() async {
@@ -22,7 +24,7 @@ class Player extends SpriteComponent
 
     add(RectangleHitbox());
     woodSprite = await gameRef.loadSprite("wood.png");
-
+    hachaSprite = await gameRef.loadSprite("hacha.png");
     return super.onLoad();
   }
 
@@ -55,7 +57,7 @@ class Player extends SpriteComponent
       movement.y = 1;
     }
     if (keysPressed.contains(LogicalKeyboardKey.space)) {
-      talar();
+      accion();
     }
     if (keysPressed.contains(LogicalKeyboardKey.keyE)) {
       toggleCrafteo();
@@ -63,13 +65,43 @@ class Player extends SpriteComponent
     return super.onKeyEvent(event, keysPressed);
   }
 
-  void talar() async {
-    final hits = game.children.whereType<Tree>().where(
-      (tree) => tree.toRect().overlaps(toRect()),
+  void accion() async {
+    bool action = false;
+
+    final onHacha = inventory.items.any((item) => item.name == "hacha");
+
+    if (onHacha) {
+      final trees = game.children.whereType<Tree>().where(
+        (tree) => tree.toRect().overlaps(toRect()),
+      );
+      for (final tree in trees) {
+        action = true;
+        tree.removeFromParent();
+        inventory.addItem(
+          Item(
+            name: "madera",
+            sprite: woodSprite,
+            quantity: 2,
+            imagePath: "assets/images/wood.png",
+          ),
+        );
+      }
+    }
+
+    final hachas = game.children.whereType<Hacha>().where(
+      (hacha) => hacha.toRect().overlaps(toRect()),
     );
-    for (final tree in hits) {
-      tree.removeFromParent();
-      inventory.addItem(Item(name: "madera", sprite: woodSprite));
+    for (final hacha in hachas) {
+      action = true;
+      hacha.removeFromParent();
+      inventory.addItem(
+        Item(
+          name: "hacha",
+          sprite: hachaSprite,
+          quantity: 1,
+          imagePath: "assets/images/hacha.png",
+        ),
+      );
     }
   }
 

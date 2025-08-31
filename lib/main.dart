@@ -12,17 +12,23 @@ import 'package:survival/inventory/item.dart';
 import 'package:survival/menu.dart';
 import 'package:survival/overlay_crafteo.dart';
 import 'package:survival/player.dart';
+import 'package:survival/thigs/hacha.dart';
 import 'package:survival/thigs/tree.dart';
 
 void main() {
+  final survival = Survival(); // ✅ instancia única del juego
+
   runApp(
     GameWidget(
-      game: Survival(),
+      game: survival,
       overlayBuilderMap: {
         'MainMenu': (context, game) {
           return MainMenu(game: game as Survival);
         },
-        'Crafteo': (context, game) => OverlayCrafteo(),
+        'Crafteo': (context, game) {
+          final survivalGame = game as Survival;
+          return OverlayCrafteo(inventory: survivalGame.inventory);
+        },
       },
       initialActiveOverlays: const ["MainMenu"],
     ),
@@ -49,10 +55,12 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
     super.onLoad();
     player = Player();
 
+    // cargar sprites
     water = await loadSprite("water.png");
     grass = await loadSprite("grass.jpg");
     dirt = await loadSprite("dirt.png");
 
+    // generar mapa
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
         double value = noise.getNoise2(x * 0.1, y * 0.7);
@@ -79,9 +87,12 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
         }
       }
     }
+
+    // agregar jugador
     add(player);
     camera.follow(player);
 
+    // generar árboles aleatorios
     int createTree = 0;
     final random = Random();
     while (createTree < 50) {
@@ -97,18 +108,17 @@ class Survival extends FlameGame with HasKeyboardHandlerComponents {
       }
     }
 
+    // agregar hacha en el suelo
+    final hacha = Hacha();
+    hacha.position = Vector2(50, 200);
+    add(hacha);
+
+    // inicializar inventario
     inventory = Inventory();
-
-    inventory.addItem(
-      Item(name: "madera", sprite: await loadSprite("hacha.png")),
-    );
-    inventory.addItem(
-      Item(name: "madera", sprite: await loadSprite("wood.png")),
-    );
-
     inventorycomponent = InventoryComponent(inventory);
     add(inventorycomponent);
 
+    // conectar inventario al jugador
     player.inventory = inventory;
   }
 
